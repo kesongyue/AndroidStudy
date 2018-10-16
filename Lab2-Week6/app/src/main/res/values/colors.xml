@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="btnBackground">#3F51B5</color>
+    <color name="white">#ffffffff</color>
+    <color name="black">#000000</color>
+
+    <color name="soybean_color">#BB4C3B</color>
+    <color name="cruciferous_color">#C48D30</color>
+    <color name="milk_color">#4469B0</color>
+    <color name="fish_color">#20A17B</color>
+    <color name="mushroom_color">#BB4C3B</color>
+    <color name="tomato_color">#4469B0</color>
+    <color name="carrot_color">#20A17B</color>
+    <color name="buckwheat_color">#BB4C3B</color>
+    <color name="egg_color">#C48D30</color>
+
+    <color name="detail_divider">#1E000000</color>
+    <color name="detail_message">#D5000000</color>
+</resources>
