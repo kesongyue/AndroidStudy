@@ -3,11 +3,14 @@ package com.example.kesy.lab2_week6;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 public class DynamicReceiver extends BroadcastReceiver{
     public static final String DYNAMICACTION = "com.example.kesy.Lab3.MyDynamicFilter";
@@ -31,6 +34,15 @@ public class DynamicReceiver extends BroadcastReceiver{
             builder.setContentIntent(mPendingIntent);
             notify.defaults |=Notification.DEFAULT_SOUND;
             manager.notify(1,notify);
+        }
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        if(intent.getAction().equals(DynamicReceiver.DYNAMICACTION)){
+            String name =intent.getStringExtra("itemName");
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);//实例化RemoteView,其对应相应的Widget布局
+            views.setTextViewText(R.id.appwidget_text,"已收藏  "+name);
+            ComponentName me = new ComponentName(context, NewAppWidget.class);
+            appWidgetManager.updateAppWidget(me, views);
         }
     }
 

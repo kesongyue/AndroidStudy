@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 public class StaticReceiver extends BroadcastReceiver {
-    private static final String STATICACTION = "com.example.kesy.Lab3.MyStaticFiler";
+    public static final String STATICACTION = "com.example.kesy.Lab3.MyStaticFiler";
     @Override
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction().equals(STATICACTION)){
