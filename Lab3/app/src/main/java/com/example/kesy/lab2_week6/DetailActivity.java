@@ -36,7 +36,7 @@ public class DetailActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
 
         final Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
+        final Bundle bundle = intent.getExtras();
 
         TextView name = (TextView)findViewById(R.id.detail_item_name);
         final Item item =(Item)bundle.getSerializable("itemMessage");
@@ -71,7 +71,9 @@ public class DetailActivity extends AppCompatActivity {
                 EventBus.getDefault().post(item);
 
                 Intent intentBroadcast =new Intent(DynamicReceiver.DYNAMICACTION);
-                intentBroadcast.putExtra("itemName",item.getTextViewContent());
+                Bundle bundle1 =new Bundle();
+                bundle.putSerializable("itemMessage",item);
+                intentBroadcast.putExtras(bundle);
                 sendBroadcast(intentBroadcast);
             }
         });

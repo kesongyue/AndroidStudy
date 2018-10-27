@@ -18,6 +18,6 @@
         android:text="@string/appwidget_text"
         android:textColor="#ffffff"
         android:textSize="15sp"
-        android:textStyle="bold|italic" />
+        android:textStyle="bold" />
 
 </RelativeLayout>

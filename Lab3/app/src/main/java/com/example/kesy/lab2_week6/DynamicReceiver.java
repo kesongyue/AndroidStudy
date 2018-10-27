@@ -17,18 +17,20 @@ public class DynamicReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context,Intent intent){
+        Bundle bundle = intent.getExtras();
+        Item item = (Item)bundle.getSerializable("itemMessage");
         if(intent.getAction().equals(DYNAMICACTION)){
             NotificationManager manager =(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification.Builder builder = new Notification.Builder(context);
             Notification notify = builder.build();
             builder.setContentTitle("已收藏")
-                    .setContentText(intent.getStringExtra("itemName"))
+                    .setContentText(item.getTextViewContent())
                     .setPriority(Notification.PRIORITY_DEFAULT)
                     .setWhen(System.currentTimeMillis())
                     .setSmallIcon(R.drawable.empty_star)
                     .setAutoCancel(true);
             Intent mintent = new Intent(context,MainActivity.class);
-            mintent.putExtra("itemName",intent.getStringExtra("itemName"));
+            mintent.putExtra("itemName",item.getTextViewContent());
             mintent.putExtra("isClickedFloatingActionButton",true);
             PendingIntent mPendingIntent = PendingIntent.getActivity(context,0,mintent,PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(mPendingIntent);
@@ -38,9 +40,13 @@ public class DynamicReceiver extends BroadcastReceiver{
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         if(intent.getAction().equals(DynamicReceiver.DYNAMICACTION)){
-            String name =intent.getStringExtra("itemName");
+            String name =item.getTextViewContent();
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);//实例化RemoteView,其对应相应的Widget布局
             views.setTextViewText(R.id.appwidget_text,"已收藏  "+name);
+            Intent i = new Intent(context, MainActivity.class);
+            i.putExtra("isClickedFloatingActionButton",true);
+            PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.appwidget_image, pi); //设置点击事件
             ComponentName me = new ComponentName(context, NewAppWidget.class);
             appWidgetManager.updateAppWidget(me, views);
         }

@@ -50,7 +50,14 @@ public class NewAppWidget extends AppWidgetProvider {
         if(intent.getAction().equals(StaticReceiver.STATICACTION)){
             Item item =(Item)bundle.getSerializable("itemBroadcast");
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);//实例化RemoteView,其对应相应的Widget布局
-            views.setTextViewText(R.id.appwidget_text,"今日推荐 "+item.getTextViewContent());
+
+            Intent newIntent = new Intent(context,DetailActivity.class);
+            Bundle newBundle = new Bundle();
+            newBundle.putSerializable("itemMessage",item);
+            newIntent.putExtras(newBundle);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,newIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.appwidget_image,pendingIntent);
+            views.setTextViewText(R.id.appwidget_text,"今日推荐  "+item.getTextViewContent());
             ComponentName me = new ComponentName(context, NewAppWidget.class);
             appWidgetManager.updateAppWidget(me, views);
         }
