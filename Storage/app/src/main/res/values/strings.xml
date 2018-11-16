@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Storage</string>
+    <string name="btn_text1">OK</string>
+    <string name="btn_text2">CLEAR</string>
+</resources>
