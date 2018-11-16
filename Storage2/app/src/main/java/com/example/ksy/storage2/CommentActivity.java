@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -87,7 +88,22 @@ public class CommentActivity extends AppCompatActivity {
                 if(ContextCompat.checkSelfPermission(CommentActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(CommentActivity.this, new String[]{Manifest.permission.READ_CONTACTS},1);
                 }else{
-
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(CommentActivity.this);
+                    dialog.setTitle("Info").setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" = ?",new String[]{itemList.get(position).GetUsername()},null);
+                    if(cursor.moveToFirst()){
+                        //String displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                        String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        dialog.setMessage("Username: "+itemList.get(position).GetUsername() + "\nPhone: " + phoneNumber);
+                    }else{
+                        dialog.setMessage("Username: "+itemList.get(position).GetUsername() + "\nPhone number not exist.");
+                    }
+                    dialog.show();
+                    cursor.close();
                 }
             }
         });
