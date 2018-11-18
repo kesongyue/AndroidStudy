@@ -50,7 +50,7 @@
             android:layout_height="wrap_content" />
         <EditText
             android:id="@+id/password"
-            android:hint="New Password"
+            android:hint="Password"
             android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

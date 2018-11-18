@@ -34,7 +34,7 @@ public class MyDB extends SQLiteOpenHelper{
         db.execSQL(CREATE_USER);
         db.execSQL(CREATE_COMMENT);
         db.execSQL(CREATE_UC);
-        Toast.makeText(mContext,"Create Succeeded",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext,"Create Succeeded",Toast.LENGTH_SHORT).show();
     }
 
     @Override

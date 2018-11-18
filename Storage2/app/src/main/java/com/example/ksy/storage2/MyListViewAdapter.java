@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -58,7 +57,6 @@ public class MyListViewAdapter  extends ArrayAdapter<CommentInfo>{
         }
         cursor.close();
 
-        //这里有问题--已解决
         cursor = db.rawQuery("select * from UC where commentId = ? and username = ?",new String[]{String.valueOf(item.GetId()),CommentActivity.username});
         if(cursor.getCount() > 0 ){
             viewHolder.likePic.setImageResource(R.drawable.red);

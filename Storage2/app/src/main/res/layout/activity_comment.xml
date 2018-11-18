@@ -19,6 +19,7 @@
         android:id="@+id/comment_divider"
         android:background="@color/dividerColor"
         android:layout_width="match_parent"
+        android:layout_margin="10dp"
         android:layout_height="2dp" />
 
     <android.support.constraint.ConstraintLayout

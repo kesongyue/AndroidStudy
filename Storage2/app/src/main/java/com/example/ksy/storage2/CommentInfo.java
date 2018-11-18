@@ -9,14 +9,6 @@ public class CommentInfo implements Serializable{
     private String comment;
     private int likeNum;
 
-    //创建新的Item用的。
-   /* public CommentInfo(String username,String date,String comment,int likeNum,boolean isLikeSelf){
-        this.username = username;
-        this.date = date;
-        this.comment = comment;
-        this.likeNum = likeNum;
-        this.isLikeSelf = isLikeSelf;
-    }*/
     public CommentInfo(int id,String username,String date,String comment,int likeNum){
         this.id = id;
         this.username = username;

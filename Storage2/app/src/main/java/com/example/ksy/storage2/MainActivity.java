@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 confirmPasswordEdit.setVisibility(View.GONE);
                 isInLoginPage = true;
                 passwordEdit.setText("");
+                passwordEdit.setHint("Password");
             }
         });
 
@@ -79,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
                 isInLoginPage = false;
                 passwordEdit.setText("");
                 confirmPasswordEdit.setText("");
-
-                Log.d("SELECEIMAGE",imageView.getTag().toString());
+                passwordEdit.setHint("New Password");
+                //Log.d("SELECEIMAGE",imageView.getTag().toString());
             }
         });
 
