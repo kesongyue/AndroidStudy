@@ -6,10 +6,13 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.util.Log;
 
-public class MusicService extends Service {
-    private IBinder myBinder = new MyBinder();
+public class MusicService extends Service{
+    private MyBinder myBinder = new MyBinder();
+    public final static int PLAYORPAUSE=0,STOP=1,SEEKTO=2,SETMEDIAPATH=3,GETMEDIAPATH=4;
     public static MediaPlayer mediaPlayer = null;
     private static String mediaPath;
     public MusicService(){
@@ -21,10 +24,38 @@ public class MusicService extends Service {
     }
 
     public class MyBinder extends Binder{
-        public MusicService getService(){
+        /*public MusicService getService(){
             return MusicService.this;
+        }*/
+        @Override
+        public boolean onTransact(int code, Parcel data,Parcel reply,int flags)throws RemoteException{
+            switch (code){
+                case PLAYORPAUSE:
+                    data.enforceInterface("MusicService");
+                    int isPlayOrPause = playOrPause() ? 1 : 0;
+                    reply.writeInt(isPlayOrPause);
+                    break;
+                case STOP:
+                    stop();
+                    break;
+                case SEEKTO:
+                    data.enforceInterface("MusicService");
+                    seekTo(data.readInt());
+                    break;
+                case SETMEDIAPATH:
+                    data.enforceInterface("MusicService");
+                    setPlaySource(data.readString());
+                    break;
+                case GETMEDIAPATH:
+                    data.enforceInterface("MusicService");
+                    reply.writeString(getMediaPath());
+                    break;
+            }
+            return super.onTransact(code,data,reply,flags);
         }
+
     }
+
     @Override
     public IBinder onBind(Intent intent) {
         return myBinder;

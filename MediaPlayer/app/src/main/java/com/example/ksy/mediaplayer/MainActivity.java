@@ -17,6 +17,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -34,6 +36,16 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,11 +55,30 @@ public class MainActivity extends AppCompatActivity {
     private CircleImageView circleImageView;
     private SeekBar seekBar;
     private MusicService musicService=new MusicService();
-    private ServiceConnection connection;
     private final int RESULT_LOAD_AUDIO = 1;
     private ObjectAnimator objectAnimator;
     private SimpleDateFormat time = new SimpleDateFormat("mm:ss");
+    private IBinder musicBinder;
+    private Parcel data,reply;
+    private Observable<Integer> observable;
+    private Observer<Integer>observer;
 
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // musicService = ((MusicService.MyBinder)service).getService();
+            Log.d("MainActivity","Connect Success");
+            musicBinder = service;
+            init();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            //musicService = null;
+            musicBinder = null;
+            Log.d("MainActivity","Connect Fail");
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
         fileImage = (ImageView)findViewById(R.id.file);
         circleImageView = (CircleImageView)findViewById(R.id.image) ;
         seekBar = (SeekBar)findViewById(R.id.seek_bar);
-
-        init();
+        data = Parcel.obtain();
+        reply = Parcel.obtain();
 
         //TODO：用ObjectAnimator实现专辑图片的旋转.
         objectAnimator = ObjectAnimator.ofFloat(circleImageView,"rotation",0,360);
@@ -78,17 +109,42 @@ public class MainActivity extends AppCompatActivity {
             objectAnimator.start();
         }
         //TODO:ServiceConnection实例，用于连接主活动和服务。
-        connection = new ServiceConnection() {
+
+        Intent bindIntent = new Intent(this,MusicService.class);
+        startService(bindIntent);
+        bindService(bindIntent,connection,BIND_AUTO_CREATE);
+
+        observable = Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                musicService = ((MusicService.MyBinder)service).getService();
+            public void subscribe(@NonNull ObservableEmitter<Integer> e)throws Exception{
+                while(true){
+                    e.onNext(MusicService.mediaPlayer.getCurrentPosition());
+                    Thread.sleep(800);
+                }
+            }
+        });
+
+        observer = new Observer<Integer>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+            @Override
+            public void onNext(Integer integer) {
+                seekBar.setProgress(integer);
+                startTimeText.setText(time.format(integer));
             }
 
             @Override
-            public void onServiceDisconnected(ComponentName name) {
-                musicService = null;
+            public void onError(Throwable e) {
+                Log.e("MainActivity", "onError : value : " + e.getMessage() + "\n" );
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d("MainActivity", "OnComplete" );
             }
         };
+        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(observer);
 
         //TODO:申请读取文件的权限
         try{
@@ -100,16 +156,24 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this,"There is no file",Toast.LENGTH_SHORT).show();
         }
 
-        new Thread(new SeekBarThread()).start();
-
         //TODO:播放或暂停按钮的监听事件
         playImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent bindIntent = new Intent(MainActivity.this,MusicService.class);
-                startService(bindIntent);
-                //bindService(bindIntent,connection,BIND_AUTO_CREATE);
-                if(musicService.playOrPause()){
+                //musicService.playOrPause();
+                int isPlayOrPause=0;
+                try{
+                    data.writeInterfaceToken("MusicService");
+                    musicBinder.transact(MusicService.PLAYORPAUSE,data,reply,0);
+                    isPlayOrPause = reply.readInt();
+                }catch(RemoteException e){
+                    e.printStackTrace();
+                }finally {
+                    data.recycle();
+                    reply.recycle();
+                }
+
+                if(isPlayOrPause == 1){
                     if(!objectAnimator.isStarted()){
                         objectAnimator.start();
                     }else{
@@ -127,7 +191,16 @@ public class MainActivity extends AppCompatActivity {
         stopImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                musicService.stop();
+               // musicService.stop();
+                try{
+                    data.writeInterfaceToken("MusicService");
+                    musicBinder.transact(MusicService.STOP,data,reply,0);
+                }catch(RemoteException e){
+                    e.printStackTrace();
+                }finally {
+                    data.recycle();
+                    reply.recycle();
+                }
                 objectAnimator.end();
                 playImage.setImageResource(R.drawable.play);
                 init();
@@ -138,7 +211,16 @@ public class MainActivity extends AppCompatActivity {
         backImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                musicService.stop();
+                //musicService.stop();
+                try{
+                    data.writeInterfaceToken("MusicService");
+                    musicBinder.transact(MusicService.STOP,data,reply,0);
+                }catch(RemoteException e){
+                    e.printStackTrace();
+                }finally {
+                    data.recycle();
+                    reply.recycle();
+                }
                 Intent bindIntent = new Intent(MainActivity.this,MusicService.class);
                 stopService(bindIntent);
                 //unbindService(connection);
@@ -165,7 +247,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser){
-                    musicService.seekTo(progress);
+                    //musicService.seekTo(progress);
+                    try{
+                        data.writeInterfaceToken("MusicService");
+                        data.writeInt(progress);
+                        musicBinder.transact(MusicService.SEEKTO,data,reply,0);
+                    }catch(RemoteException e){
+                        e.printStackTrace();
+                    }finally {
+                        data.recycle();
+                        reply.recycle();
+                    }
                 }
             }
             @Override
@@ -180,27 +272,38 @@ public class MainActivity extends AppCompatActivity {
         MusicService.mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                playImage.setImageResource(R.drawable.play);
                 objectAnimator.pause();
                 seekBar.setProgress(MusicService.mediaPlayer.getCurrentPosition());
                 startTimeText.setText(String.valueOf(time.format(MusicService.mediaPlayer.getCurrentPosition())));
             }
         });
+
     }
 
     @Override
-    protected void onActivityResult(int requestCode,int resultCode,Intent data){
-        super.onActivityResult(requestCode,resultCode,data);
+    protected void onActivityResult(int requestCode,int resultCode,Intent dataIntent){
+        super.onActivityResult(requestCode,resultCode,dataIntent);
 
-        if(requestCode == RESULT_LOAD_AUDIO && resultCode == RESULT_OK && data != null){
-            Uri selectAudioUri = data.getData();
+        if(requestCode == RESULT_LOAD_AUDIO && resultCode == RESULT_OK && dataIntent != null){
+            Uri selectAudioUri = dataIntent.getData();
             String[] filePathColumn = {MediaStore.Audio.Media.DATA};
             Cursor cursor = getContentResolver().query(selectAudioUri,filePathColumn,null,null,null);
             cursor.moveToLast();
             String audioPath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
             cursor.close();
 
-           // Log.d("MainActivity",audioPath);
-            musicService.setPlaySource(audioPath);
+            //musicService.setPlaySource(audioPath);
+            try{
+                data.writeInterfaceToken("MusicService");
+                data.writeString(audioPath);
+                musicBinder.transact(MusicService.SETMEDIAPATH,data,reply,0);
+            }catch(RemoteException e){
+                e.printStackTrace();
+            }finally {
+                data.recycle();
+                reply.recycle();
+            }
             objectAnimator.end();
             init();
         }
@@ -208,18 +311,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        //unbindService(connection);
+        unbindService(connection);
     }
 
     //TODO: 根据服务里的MeidaPlayer对象内容初始化活动的界面
     public void init(){
+        String mediaPath=null;
+        try{
+            data.writeInterfaceToken("MusicService");
+            musicBinder.transact(MusicService.GETMEDIAPATH,data,reply,0);
+            mediaPath = reply.readString();
+        }catch(RemoteException e){
+            e.printStackTrace();
+        }finally {
+            data.recycle();
+            reply.recycle();
+        }
+
         seekBar.setMax(MusicService.mediaPlayer.getDuration());
         seekBar.setProgress(MusicService.mediaPlayer.getCurrentPosition());
         startTimeText.setText(time.format(MusicService.mediaPlayer.getCurrentPosition()));
         endTimeText.setText(time.format(MusicService.mediaPlayer.getDuration()));
 
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(musicService.getMediaPath());
+        mmr.setDataSource(mediaPath);
         nameText.setText(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));  //歌名
         authorText.setText(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)); //歌手名字
         Log.d("MainActivity","ALBUM:"+mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
@@ -235,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //TODO:开启一个线程，当播放音乐时更新进度条的进度，由于要涉及到UI的修改，所以用到Handler
-    class SeekBarThread implements Runnable{
+   /* class SeekBarThread implements Runnable{
         @Override
         public void run(){
             while(musicService!=null){
@@ -243,7 +358,6 @@ public class MainActivity extends AppCompatActivity {
                     message.what = 0;
                     message.obj = MusicService.mediaPlayer.getCurrentPosition();
                     handler.sendMessage(message);
-
                 try{
                     Thread.sleep(800);
                 }catch (Exception e){
@@ -251,10 +365,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-    }
+    }*/
 
     //TODO：Handler实例，对UI进行修改
-    @SuppressLint("HandlerLeak")
+   /* @SuppressLint("HandlerLeak")
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg){
@@ -267,5 +381,5 @@ public class MainActivity extends AppCompatActivity {
                 default:break;
             }
         }
-    };
+    };*/
 }
