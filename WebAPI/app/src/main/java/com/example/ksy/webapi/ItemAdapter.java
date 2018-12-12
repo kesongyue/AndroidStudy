@@ -33,6 +33,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
@@ -72,7 +73,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder,int position){
+    public void onBindViewHolder(final ViewHolder holder, int position){
         final APIInfo item = itemList.get(position);
         final ViewHolder viewHolder = holder;
         //holder.cover.setImageURI(Uri.parse(item.GetCoverURL()));
@@ -92,6 +93,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                     InputStream inputStream = connection.getInputStream();
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                     emitter.onNext(bitmap);
+                    inputStream.close();
                 }catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -138,6 +140,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                         while((line = reader.readLine()) != null){
                             response.append(line);
                         }
+                        in.close();
                         JSONObject jsonObject = new JSONObject(response.toString());
                         if(jsonObject.getInt("code") == 0){
                             Gson gson = new Gson();
@@ -156,32 +159,65 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 }
             }
 
-        }).subscribeOn(Schedulers.newThread())
-            .observeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .doOnNext(new Consumer<PriviewInfo>() {
+                @Override
+                public void accept(PriviewInfo priviewInfo) throws Exception {
+                    try{
+                        URL url = new URL(priviewInfo.GetImage().get(0));
+                        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                        InputStream inputStream = connection.getInputStream();
+                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                        int pictureNum = priviewInfo.GetIndex().size()-2;
+                        int xLen = priviewInfo.GetImageXLen();
+                        int imageXSize = priviewInfo.GetImageXSize();
+                        int imageYSize = priviewInfo.GetImageYSize();
+                        int yLen = pictureNum / xLen +1;
+                        for(int y = 0;y < yLen;y++){
+                            for(int x = 0;x < xLen; x++){
+                                if((y+1) * xLen + x >= pictureNum){
+                                    break;
+                                }
+                                Bitmap pic = Bitmap.createBitmap(bitmap,x*imageXSize,y*imageYSize,imageXSize,imageYSize);
+                                holder.priviewImage.add(pic);
+                            }
+                        }
+                        connection.disconnect();
+                        inputStream.close();
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            })
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<PriviewInfo>() {
                   @Override
                   public void onSubscribe(Disposable d) {
                   }
 
                   @Override
-                  public void onNext(PriviewInfo priviewInfo) {
-                      try{
-                          URL url = new URL(priviewInfo.GetImage().get(0));
-                          HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-                          InputStream inputStream = connection.getInputStream();
-                          Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                          int pictureNum = priviewInfo.GetIndex().size()-2;
-                          int xLen = priviewInfo.GetImageXLen();
-                          int imageXSize = priviewInfo.GetImageXSize();
-                          int imageYSize = priviewInfo.GetImageYSize();
-                          int yLen = pictureNum / xLen +1;
-                          for(int y = 0;y < yLen;y++){
-                              //for(int x = 0;)
-                          }
+                  public void onNext(final PriviewInfo priviewInfo) {
+                      holder.seekBar.setMax(holder.priviewImage.size());
+                      holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                         @Override
+                         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                             if(progress >= holder.priviewImage.size())
+                                 return;
+                             holder.cover.setImageBitmap(holder.priviewImage.get(progress));
+                             Log.d("ItemAdapter","seek bar changeed");
+                         }
 
-                      }catch (Exception e) {
-                          e.printStackTrace();
-                      }
+                         @Override
+                         public void onStartTrackingTouch(SeekBar seekBar) {
+
+                         }
+
+                         @Override
+                         public void onStopTrackingTouch(SeekBar seekBar) {
+
+                         }
+                     });
 
                   }
 
