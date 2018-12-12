@@ -44,6 +44,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         ProgressBar progressBar;
         SeekBar seekBar;
         List<Bitmap> priviewImage;
+        Bitmap coverImage;
 
         public ViewHolder(View view){
             super(view);
@@ -58,22 +59,48 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             seekBar = (SeekBar)view.findViewById(R.id.seekbar);
             priviewImage = new ArrayList<>();
             //seekBar.setEnabled(false);
+            seekBar.setMax(0);
         }
     }
 
-    public ItemAdapter(List<APIInfo> itemList){
-        this.itemList = itemList;
+    public ItemAdapter(List<APIInfo> mitemList){
+        this.itemList = mitemList;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent ,int viewType){
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item,parent,false);
-        ViewHolder viewHolder = new ViewHolder(view);
+    public ViewHolder onCreateViewHolder(ViewGroup parent , final int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
+        final ViewHolder viewHolder = new ViewHolder(view);
+
+        viewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (progress >= viewHolder.priviewImage.size() || !fromUser)
+                    return;
+                viewHolder.cover.setImageBitmap(viewHolder.priviewImage.get(progress));
+                //Log.d("ItemAdapter", "seek bar changeed");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seekBar.setProgress(0);
+                if(viewHolder.coverImage != null)
+                    viewHolder.cover.setImageBitmap(viewHolder.coverImage);
+            }
+        });
+
+
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position){
+    public void onBindViewHolder(final ViewHolder holder, final int position){
+        //Log.d("ItemAdapter",position+"");
         final APIInfo item = itemList.get(position);
         final ViewHolder viewHolder = holder;
         //holder.cover.setImageURI(Uri.parse(item.GetCoverURL()));
@@ -91,9 +118,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                     URL url = new URL(item.GetCoverURL());
                     HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                     InputStream inputStream = connection.getInputStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    emitter.onNext(bitmap);
+                    viewHolder.coverImage = BitmapFactory.decodeStream(inputStream);
+                    emitter.onNext(viewHolder.coverImage);
                     inputStream.close();
+                    connection.disconnect();
                 }catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -174,6 +202,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                         int imageXSize = priviewInfo.GetImageXSize();
                         int imageYSize = priviewInfo.GetImageYSize();
                         int yLen = pictureNum / xLen +1;
+                        if(bitmap == null){
+                            return;
+                        }
+                        holder.priviewImage.clear();
                         for(int y = 0;y < yLen;y++){
                             for(int x = 0;x < xLen; x++){
                                 if((y+1) * xLen + x >= pictureNum){
@@ -198,12 +230,14 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
                   @Override
                   public void onNext(final PriviewInfo priviewInfo) {
-                      holder.seekBar.setMax(holder.priviewImage.size());
-                      holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                      holder.seekBar.setMax(holder.priviewImage.size()-1);
+                     // Log.d("ItemAdapter","position: " + position +" size: "+holder.priviewImage.size());
+                      /*holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                          @Override
                          public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                             if(progress >= holder.priviewImage.size())
+                             if(progress >= holder.priviewImage.size() || !fromUser)
                                  return;
+                             seekBar.setProgress(progress);
                              holder.cover.setImageBitmap(holder.priviewImage.get(progress));
                              Log.d("ItemAdapter","seek bar changeed");
                          }
@@ -217,7 +251,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                          public void onStopTrackingTouch(SeekBar seekBar) {
 
                          }
-                     });
+                     });*/
 
                   }
 
