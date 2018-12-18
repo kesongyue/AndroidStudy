@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".IssueActivity"
+    android:orientation="vertical"
+    android:layout_margin="10dp">
+
+    <EditText
+        android:id="@+id/issue_token"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="输入Token"/>
+
+    <EditText
+        android:id="@+id/issue_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="输入Title"/>
+
+    <EditText
+        android:id="@+id/issue_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="输入body"/>
+
+    <Button
+        android:id="@+id/issue_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="增加ISSUE"
+        android:layout_gravity="center"
+        android:layout_margin="20dp"/>
+
+    <ListView
+        android:id="@+id/issue_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerHeight="20dp"
+        android:divider="#FFFFFF">
+
+    </ListView>
+
+</LinearLayout>

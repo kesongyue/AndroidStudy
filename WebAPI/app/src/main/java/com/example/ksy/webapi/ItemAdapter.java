@@ -129,26 +129,26 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 }
             }
         }).subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new Observer<Bitmap>() {
-              @Override
-              public void onSubscribe(Disposable d) {
-              }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Bitmap>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
 
-              @Override
-              public void onNext(Bitmap bitmap) {
-                    viewHolder.progressBar.setVisibility(View.GONE);
-                    //viewHolder.cover.setVisibility(View.VISIBLE);
-                    viewHolder.cover.setImageBitmap(bitmap);
-              }
+                    @Override
+                    public void onNext(Bitmap bitmap) {
+                        viewHolder.progressBar.setVisibility(View.GONE);
+                        //viewHolder.cover.setVisibility(View.VISIBLE);
+                        viewHolder.cover.setImageBitmap(bitmap);
+                    }
 
-              @Override
-              public void onError(Throwable e) {
-              }
-              @Override
-              public void onComplete() {
-              }
-          });
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+                    @Override
+                    public void onComplete() {
+                    }
+                });
 
         Observable.create(new ObservableOnSubscribe<PriviewInfo>() {
             @Override
@@ -188,50 +188,50 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             }
 
         }).subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .doOnNext(new Consumer<PriviewInfo>() {
-                @Override
-                public void accept(PriviewInfo priviewInfo) throws Exception {
-                    try{
-                        URL url = new URL(priviewInfo.GetImage().get(0));
-                        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-                        InputStream inputStream = connection.getInputStream();
-                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                        int pictureNum = priviewInfo.GetIndex().size()-2;
-                        int xLen = priviewInfo.GetImageXLen();
-                        int imageXSize = priviewInfo.GetImageXSize();
-                        int imageYSize = priviewInfo.GetImageYSize();
-                        int yLen = pictureNum / xLen +1;
-                        if(bitmap == null){
-                            return;
-                        }
-                        holder.priviewImage.clear();
-                        for(int y = 0;y < yLen;y++){
-                            for(int x = 0;x < xLen; x++){
-                                if((y+1) * xLen + x >= pictureNum){
-                                    break;
-                                }
-                                Bitmap pic = Bitmap.createBitmap(bitmap,x*imageXSize,y*imageYSize,imageXSize,imageYSize);
-                                holder.priviewImage.add(pic);
+                .observeOn(Schedulers.io())
+                .doOnNext(new Consumer<PriviewInfo>() {
+                    @Override
+                    public void accept(PriviewInfo priviewInfo) throws Exception {
+                        try{
+                            URL url = new URL(priviewInfo.GetImage().get(0));
+                            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                            InputStream inputStream = connection.getInputStream();
+                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                            int pictureNum = priviewInfo.GetIndex().size()-2;
+                            int xLen = priviewInfo.GetImageXLen();
+                            int imageXSize = priviewInfo.GetImageXSize();
+                            int imageYSize = priviewInfo.GetImageYSize();
+                            int yLen = pictureNum / xLen +1;
+                            if(bitmap == null){
+                                return;
                             }
+                            holder.priviewImage.clear();
+                            for(int y = 0;y < yLen;y++){
+                                for(int x = 0;x < xLen; x++){
+                                    if((y+1) * xLen + x >= pictureNum){
+                                        break;
+                                    }
+                                    Bitmap pic = Bitmap.createBitmap(bitmap,x*imageXSize,y*imageYSize,imageXSize,imageYSize);
+                                    holder.priviewImage.add(pic);
+                                }
+                            }
+                            connection.disconnect();
+                            inputStream.close();
+                        }catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        connection.disconnect();
-                        inputStream.close();
-                    }catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-            })
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer<PriviewInfo>() {
-                  @Override
-                  public void onSubscribe(Disposable d) {
-                  }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<PriviewInfo>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
 
-                  @Override
-                  public void onNext(final PriviewInfo priviewInfo) {
-                      holder.seekBar.setMax(holder.priviewImage.size()-1);
-                     // Log.d("ItemAdapter","position: " + position +" size: "+holder.priviewImage.size());
+                    @Override
+                    public void onNext(final PriviewInfo priviewInfo) {
+                        holder.seekBar.setMax(holder.priviewImage.size()-1);
+                        // Log.d("ItemAdapter","position: " + position +" size: "+holder.priviewImage.size());
                       /*holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                          @Override
                          public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -253,18 +253,18 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                          }
                      });*/
 
-                  }
+                    }
 
-                  @Override
-                  public void onError(Throwable e) {
+                    @Override
+                    public void onError(Throwable e) {
 
-                  }
+                    }
 
-                  @Override
-                  public void onComplete() {
+                    @Override
+                    public void onComplete() {
 
-                  }
-          });
+                    }
+                });
     }
 
     @Override
