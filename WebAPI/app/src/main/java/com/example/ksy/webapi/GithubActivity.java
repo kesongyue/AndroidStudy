@@ -1,5 +1,6 @@
 package com.example.ksy.webapi;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -87,7 +88,11 @@ public class GithubActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                ListItem item = list.get(position);
+                Intent intent = new Intent(GithubActivity.this,IssueActivity.class);
+                intent.putExtra("username",item.GetUsername());
+                intent.putExtra("repo",item.GetProjectName());
+                startActivity(intent);
             }
         });
     }
