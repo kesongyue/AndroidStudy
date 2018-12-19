@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
@@ -64,6 +65,10 @@ public class GithubActivity extends AppCompatActivity {
 
                             @Override
                             public void onNext(List<RepoMessage> repoMessages) {
+                                if(repoMessages.isEmpty()){
+                                    Toast.makeText(GithubActivity.this,"No repo",Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
                                 for(RepoMessage repo : repoMessages){
                                     if(repo.GetHasIssues()) {
                                         ListItem item = new ListItem(repo.GetName(), repo.GetId(), repo.GetIssuesCount(), repo.GetDescription(),username);

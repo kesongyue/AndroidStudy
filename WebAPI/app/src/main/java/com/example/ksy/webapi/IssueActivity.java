@@ -3,14 +3,18 @@ package com.example.ksy.webapi;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -18,6 +22,8 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -41,8 +47,8 @@ public class IssueActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
 
         Intent intent = getIntent();
-        String username = intent.getStringExtra("username");
-        String repo = intent.getStringExtra("repo");
+        final String username = intent.getStringExtra("username");
+        final String repo = intent.getStringExtra("repo");
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.github.com/")
@@ -50,7 +56,7 @@ public class IssueActivity extends AppCompatActivity {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
 
-        GetRequestInterface requestInterface = retrofit.create(GetRequestInterface.class);
+        final GetRequestInterface requestInterface = retrofit.create(GetRequestInterface.class);
 
         Observable<List<IssueInfo>> observable = requestInterface.getIssue(username,repo);
         observable.subscribeOn(Schedulers.io())
@@ -83,6 +89,46 @@ public class IssueActivity extends AppCompatActivity {
 
                     }
                 });
+
+        addIssue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Gson gson = new Gson();
+                HashMap<String,String> paramsMap = new HashMap<>();
+                paramsMap.put("body",body.getText().toString());
+                paramsMap.put("title",title.getText().toString());
+                String strEntity = gson.toJson(paramsMap);
+                RequestBody requestBody= RequestBody.create(okhttp3.MediaType.parse("application/json;charset=UTF-8"),strEntity);
+                //Log.d("IssueActivity",requestBody.);
+                //String tokenStr = "token 8ff45a4a70f5f3c8854ca30e7bdede01fd92d659";
+                Observable<IssueInfo> issueInfoObservable = requestInterface.createIssue(requestBody,username,repo);
+                issueInfoObservable.subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<IssueInfo>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(IssueInfo issueInfo) {
+                                list.add(issueInfo);
+                                adapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Toast.makeText(IssueActivity.this,"Add Issue error",Toast.LENGTH_SHORT).show();
+                                e.getMessage();
+                            }
+
+                            @Override
+                            public void onComplete() {
+                                Toast.makeText(IssueActivity.this,"Add Issue Successfully",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
 
     }
 }
