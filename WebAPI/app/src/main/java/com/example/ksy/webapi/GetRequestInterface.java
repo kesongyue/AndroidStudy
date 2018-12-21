@@ -18,11 +18,8 @@ public interface GetRequestInterface{
     @GET("/repos/{username}/{repo}/issues")
     Observable<List<IssueInfo>> getIssue(@Path("username")String username,@Path("repo")String repoName);
 
-    @Headers({"Content-type:application/json;charset=UTF-8","Authorization: token 8ff45a4a70f5f3c8854ca30e7bdede01fd92d659"})
+    @Headers({"Content-type:application/json;charset=UTF-8","Authorization: token 860269799c3899a9da009c049474dbbd45355b1f"})
     @POST("/repos/{username}/{repo}/issues")
     Observable<IssueInfo> createIssue(@Body RequestBody route,@Path("username")String username,@Path("repo")String repoName);
-    //https://www.jianshu.com/p/32bfd5fd8b48
-    //https://segmentfault.com/a/1190000015144126?utm_source=tag-newest
-    // https://blog.csdn.net/carson_ho/article/details/73732076
-    //https://blog.csdn.net/carson_ho/article/details/79125101
+
 }

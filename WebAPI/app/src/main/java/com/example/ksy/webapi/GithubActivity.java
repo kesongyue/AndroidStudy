@@ -10,8 +10,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +82,17 @@ public class GithubActivity extends AppCompatActivity {
 
                             @Override
                             public void onError(Throwable e) {
-
+                               // Toast.makeText(GithubActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                                if(e instanceof UnknownHostException){
+                                    Toast.makeText(GithubActivity.this,"网络连接错误",Toast.LENGTH_SHORT).show();
+                                }else if(e instanceof HttpException){
+                                    HttpException exception = (HttpException)e;
+                                    int code = exception.response().code();
+                                    String message = exception.getMessage();
+                                    Toast.makeText(GithubActivity.this, message,Toast.LENGTH_SHORT).show();
+                                }else{
+                                    e.printStackTrace();
+                                }
                             }
                             @Override
                             public void onComplete() {

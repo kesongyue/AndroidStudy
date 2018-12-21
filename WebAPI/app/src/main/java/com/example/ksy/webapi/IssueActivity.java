@@ -11,8 +11,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +83,16 @@ public class IssueActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(Throwable e) {
-
+                        if(e instanceof UnknownHostException){
+                            Toast.makeText(IssueActivity.this,"网络连接错误",Toast.LENGTH_SHORT).show();
+                        }else if(e instanceof HttpException){
+                            HttpException exception = (HttpException)e;
+                            int code = exception.response().code();
+                            String message = exception.getMessage();
+                            Toast.makeText(IssueActivity.this,code + message,Toast.LENGTH_SHORT).show();
+                        }else{
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
@@ -99,8 +110,6 @@ public class IssueActivity extends AppCompatActivity {
                 paramsMap.put("title",title.getText().toString());
                 String strEntity = gson.toJson(paramsMap);
                 RequestBody requestBody= RequestBody.create(okhttp3.MediaType.parse("application/json;charset=UTF-8"),strEntity);
-                //Log.d("IssueActivity",requestBody.);
-                //String tokenStr = "token 8ff45a4a70f5f3c8854ca30e7bdede01fd92d659";
                 Observable<IssueInfo> issueInfoObservable = requestInterface.createIssue(requestBody,username,repo);
                 issueInfoObservable.subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -118,8 +127,17 @@ public class IssueActivity extends AppCompatActivity {
 
                             @Override
                             public void onError(Throwable e) {
-                                Toast.makeText(IssueActivity.this,"Add Issue error",Toast.LENGTH_SHORT).show();
-                                e.getMessage();
+                                if(e instanceof UnknownHostException){
+                                    Toast.makeText(IssueActivity.this,"网络连接错误",Toast.LENGTH_SHORT).show();
+                                }else if(e instanceof HttpException){
+
+                                    HttpException exception = (HttpException)e;
+                                    int code = exception.response().code();
+                                    String message = exception.getMessage();
+                                    Toast.makeText(IssueActivity.this,code + message,Toast.LENGTH_SHORT).show();
+                                }else{
+                                    e.printStackTrace();
+                                }
                             }
 
                             @Override
