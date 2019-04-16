@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddActivity"
+    android:background="#eeeeee">
+
+    <LinearLayout style="@style/top_layout"
+        android:id="@+id/add_page_top">
+        <ImageView
+            android:id="@+id/add_page_top_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/add_page_cancel_pic"
+            android:layout_weight="1"
+            android:layout_marginRight="20dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="新增项目"
+            android:textSize="20dp"
+            android:textAlignment="center"
+            android:layout_weight="18" />
+        <ImageView
+            android:id="@+id/add_page_top_positive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/add_page_positive_pic"
+            android:layout_weight="1"
+            android:layout_marginLeft="20dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/add_page_top"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout style="@style/wrap_layout"
+            android:id="@+id/add_page_project"
+            app:layout_constraintTop_toTopOf="parent">
+            <LinearLayout style="@style/top_layout"
+                android:id="@+id/add_page_project_item">
+                <TextView
+                    android:id="@+id/add_page_project_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="项目名称"
+                    android:textSize="20dp"
+                    android:layout_weight="2" />
+                <TextView
+                    android:id="@+id/add_page_project_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="输入名称" />
+            </LinearLayout>
+
+            <View style="@style/line_style"/>
+
+            <LinearLayout style="@style/top_layout"
+                android:id="@+id/add_page_tag_item">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="标签"
+                    android:layout_weight="1"/>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/arrow"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/wrap_layout"
+            android:id="@+id/add_page_time"
+            app:layout_constraintTop_toBottomOf="@id/add_page_project">
+            <LinearLayout style="@style/top_layout"
+                android:id="@+id/add_page_start_time_item">
+                <TextView
+                    android:id="@+id/add_page_start_time_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="开始时间"
+                    android:layout_weight="2"/>
+                <TextView
+                    android:id="@+id/add_page_start_time_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2019年1月1号" />
+            </LinearLayout>
+
+            <View style="@style/line_style"/>
+
+            <LinearLayout style="@style/top_layout"
+                android:id="@+id/add_page_end_time_item">
+                <TextView
+                    android:id="@+id/add_page_end_time_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="结束时间"
+                    android:layout_weight="2"/>
+                <TextView
+                    android:id="@+id/add_page_end_time_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2019年1月1号" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/wrap_layout"
+            android:id="@+id/add_page_record_info"
+            app:layout_constraintTop_toBottomOf="@id/add_page_time">
+            <LinearLayout style="@style/top_layout">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="记录进度"
+                    android:layout_weight="2"/>
+                <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:track="@drawable/track"
+                    android:thumb="@drawable/thumb"/>
+            </LinearLayout>
+
+            <View style="@style/line_style"/>
+
+            <LinearLayout style="@style/top_layout"
+                android:id="@+id/add_page_process_item">
+                <TextView
+                    android:id="@+id/add_page_process_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="进度单位"
+                    android:layout_weight="2"/>
+                <TextView
+                    android:id="@+id/add_page_process_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="章"/>
+            </LinearLayout>
+
+            <View style="@style/line_style"/>
+
+            <LinearLayout style="@style/top_layout"
+                android:id="@+id/add_page_process_sum_item">
+                <TextView
+                    android:id="@+id/add_page_process_sum_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="进度总量"
+                    android:layout_weight="2"/>
+                <TextView
+                    android:id="@+id/add_page_process_sum_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="17"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/wrap_layout"
+            android:id="@+id/add_page_punch"
+            app:layout_constraintTop_toBottomOf="@id/add_page_record_info">
+            <LinearLayout style="@style/top_layout">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="打卡项目"
+                    android:layout_weight="2"/>
+                <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:track="@drawable/track"
+                    android:thumb="@drawable/thumb"/>
+            </LinearLayout>
+            <LinearLayout style="@style/top_layout">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12dp"
+                    android:text="打卡项目每次打卡进度量 + 1" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</android.support.constraint.ConstraintLayout>
